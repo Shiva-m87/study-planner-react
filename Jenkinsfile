@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "react-app"
+        CONTAINER_NAME = "react-container"
+    }
+
     stages {
 
         stage('Clone Code') {
@@ -11,19 +16,22 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("my-app-image")
-                }
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
-        stage('Run Container') {
+        stage('Stop Old Container') {
             steps {
-                script {
-                    sh 'docker stop my-app || true'
-                    sh 'docker rm my-app || true'
-                    sh 'docker run -d -p 3000:3000 --name my-app my-app-image'
-                }
+                sh '''
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
+                '''
+            }
+        }
+
+        stage('Run New Container') {
+            steps {
+                sh 'docker run -d -p 3000:80 --name $CONTAINER_NAME $IMAGE_NAME'
             }
         }
     }
