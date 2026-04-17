@@ -4,13 +4,14 @@ pipeline {
     environment {
         IMAGE_NAME = "react-app"
         CONTAINER_NAME = "react-container"
+        PORT = "3000"
     }
 
     stages {
 
         stage('Clone Code') {
             steps {
-                git 'https://github.com/your-username/your-repo.git'
+                git branch: 'main', url: 'https://github.com/Shiva-m87/study-planner-react.git'
             }
         }
 
@@ -20,7 +21,7 @@ pipeline {
             }
         }
 
-        stage('Stop Old Container') {
+        stage('Stop & Remove Old Container') {
             steps {
                 sh '''
                 docker stop $CONTAINER_NAME || true
@@ -31,8 +32,19 @@ pipeline {
 
         stage('Run New Container') {
             steps {
-                sh 'docker run -d -p 3000:80 --name $CONTAINER_NAME $IMAGE_NAME'
+                sh '''
+                docker run -d -p $PORT:80 --name $CONTAINER_NAME $IMAGE_NAME
+                '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment Successful! App running on port 3000"
+        }
+        failure {
+            echo "❌ Pipeline Failed! Check logs"
         }
     }
 }
