@@ -21,11 +21,11 @@ pipeline {
             }
         }
 
-        stage('Stop Old Container') {
+       stage('Stop Old Container') {
     steps {
         sh '''
-        docker ps -q --filter "ancestor=react-app" | xargs -r docker stop
-        docker ps -aq --filter "ancestor=react-app" | xargs -r docker rm
+        docker ps -q --filter "name=react-container" | xargs -r docker stop
+        docker ps -aq --filter "name=react-container" | xargs -r docker rm
         '''
     }
 }
