@@ -21,22 +21,22 @@ pipeline {
             }
         }
 
-        stage('Stop & Remove Old Container') {
-            steps {
-                sh '''
-                docker stop $CONTAINER_NAME || true
-                docker rm $CONTAINER_NAME || true
-                '''
-            }
-        }
+        stage('Stop Old Container') {
+    steps {
+        sh '''
+        docker ps -q --filter "ancestor=react-app" | xargs -r docker stop
+        docker ps -aq --filter "ancestor=react-app" | xargs -r docker rm
+        '''
+    }
+}
 
         stage('Run New Container') {
-            steps {
-                sh '''
-                docker run -d -p $PORT:80 --name $CONTAINER_NAME $IMAGE_NAME
-                '''
-            }
-        }
+    steps {
+        sh '''
+        docker run -d -p 3000:80 --name react-container react-app
+        '''
+    }
+}
     }
 
     post {
