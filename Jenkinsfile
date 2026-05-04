@@ -2,49 +2,35 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "react-app"
-        CONTAINER_NAME = "react-container"
-        PORT = "3000"
+        IMAGE_NAME = "my-app"
+        CONTAINER_NAME = "my-app-container"
     }
 
     stages {
 
-        stage('Clone Code') {
+        stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/Shiva-m87/study-planner-react.git'
+                git 'https://github.com/Shiva-m87/study-planner-react.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                bat 'docker build -t %IMAGE_NAME% .'
             }
         }
 
-       stage('Stop Old Container') {
-    steps {
-        sh '''
-        docker ps -q --filter "name=react-container" | xargs -r docker stop
-        docker ps -aq --filter "name=react-container" | xargs -r docker rm
-        '''
-    }
-}
-
-        stage('Run New Container') {
-    steps {
-        sh '''
-        docker run -d -p 3000:80 --name react-container react-app
-        '''
-    }
-}
-    }
-
-    post {
-        success {
-            echo "✅ Deployment Successful! App running on port 3000"
+        stage('Stop Old Container') {
+            steps {
+                bat 'docker stop %CONTAINER_NAME% || exit 0'
+                bat 'docker rm %CONTAINER_NAME% || exit 0'
+            }
         }
-        failure {
-            echo "❌ Pipeline Failed! Check logs"
+
+        stage('Run Container') {
+            steps {
+                bat 'docker run -d -p 3000:3000 --name %CONTAINER_NAME% %IMAGE_NAME%'
+            }
         }
     }
 }
